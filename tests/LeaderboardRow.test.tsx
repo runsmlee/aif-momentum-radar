@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { LeaderboardRow } from '../src/components/LeaderboardRow';
 import type { TechnologyMomentum } from '../src/lib/anomaly';
 
@@ -81,7 +81,10 @@ describe('LeaderboardRow', () => {
         </tbody>
       </table>
     );
-    const polyline = container.querySelector('polyline');
+    // Find the sparkline SVG specifically (has data-testid="sparkline")
+    const sparklineSvg = container.querySelector('[data-testid="sparkline"]');
+    expect(sparklineSvg).toBeTruthy();
+    const polyline = sparklineSvg!.querySelector('polyline');
     expect(polyline).toBeTruthy();
     const points = polyline!.getAttribute('points');
     expect(points).toBeTruthy();
@@ -99,11 +102,83 @@ describe('LeaderboardRow', () => {
       </table>
     );
     expect(screen.getByText(/npm/i)).toBeTruthy();
-    expect(screen.getByText(/github/i)).toBeTruthy();
-    expect(screen.getByText(/hn/i)).toBeTruthy();
+    expect(screen.getAllByText(/github/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/hn/i).length).toBeGreaterThan(0);
     // Check z-score values are displayed
     expect(screen.getByText(/2\.1/)).toBeTruthy();
     expect(screen.getByText(/1\.8/)).toBeTruthy();
     expect(screen.getByText(/0\.5/)).toBeTruthy();
+  });
+
+  it('expands detail panel on click showing per-source sparklines', () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LeaderboardRow tech={mockTech} rank={1} />
+        </tbody>
+      </table>
+    );
+
+    // No expanded detail initially
+    expect(container.querySelector('[data-testid="expanded-detail"]')).toBeNull();
+
+    // Click the row to expand
+    const row = container.querySelector('[data-testid="leaderboard-row"]')!;
+    fireEvent.click(row);
+
+    // Expanded detail should now be visible
+    expect(container.querySelector('[data-testid="expanded-detail"]')).toBeTruthy();
+  });
+
+  it('collapses detail panel on second click', () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LeaderboardRow tech={mockTech} rank={1} />
+        </tbody>
+      </table>
+    );
+
+    const row = container.querySelector('[data-testid="leaderboard-row"]')!;
+
+    // Expand
+    fireEvent.click(row);
+    expect(container.querySelector('[data-testid="expanded-detail"]')).toBeTruthy();
+
+    // Collapse
+    fireEvent.click(row);
+    expect(container.querySelector('[data-testid="expanded-detail"]')).toBeNull();
+  });
+
+  it('supports keyboard navigation (Enter to expand)', () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LeaderboardRow tech={mockTech} rank={1} />
+        </tbody>
+      </table>
+    );
+
+    const row = container.querySelector('[data-testid="leaderboard-row"]')!;
+
+    // Enter key should expand
+    fireEvent.keyDown(row, { key: 'Enter' });
+    expect(container.querySelector('[data-testid="expanded-detail"]')).toBeTruthy();
+  });
+
+  it('has aria-expanded attribute reflecting state', () => {
+    const { container } = render(
+      <table>
+        <tbody>
+          <LeaderboardRow tech={mockTech} rank={1} />
+        </tbody>
+      </table>
+    );
+
+    const row = container.querySelector('[data-testid="leaderboard-row"]')!;
+    expect(row.getAttribute('aria-expanded')).toBe('false');
+
+    fireEvent.click(row);
+    expect(row.getAttribute('aria-expanded')).toBe('true');
   });
 });

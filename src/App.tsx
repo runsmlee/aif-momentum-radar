@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { MomentumLeaderboard } from './components/MomentumLeaderboard';
+import { SeoSchema } from './components/SeoSchema';
 import { useMomentumData } from './hooks/useMomentumData';
 
 export default function App(): JSX.Element {
@@ -10,6 +11,7 @@ export default function App(): JSX.Element {
 
   return (
     <div className="min-h-screen bg-charcoal-900 text-charcoal-100">
+      <SeoSchema technologies={technologies} />
       <main className="container mx-auto px-4 py-8 md:py-12 max-w-6xl">
         <MomentumLeaderboard
           technologies={technologies}

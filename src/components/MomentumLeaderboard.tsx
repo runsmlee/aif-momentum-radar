@@ -64,7 +64,7 @@ export function MomentumLeaderboard({
             Momentum Radar
           </h1>
           <p className="text-sm text-charcoal-400 mt-1 max-w-md leading-relaxed">
-            Technologies ranked by statistical anomaly — not popularity. What's surging right now.
+            Fastest growing open source projects this week — ranked by real growth signals, not popularity.
           </p>
         </div>
 
