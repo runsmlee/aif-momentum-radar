@@ -28,8 +28,9 @@ const mockTechnologies: TechnologyMomentum[] = [
 
 describe('SeoSchema', () => {
   beforeEach(() => {
-    // Clean up any dynamic JSON-LD
+    // Clean up any dynamic/prerendered JSON-LD
     document.querySelectorAll('script[data-dynamic-jsonld]').forEach((el) => el.remove());
+    document.querySelectorAll('script#prerendered-jsonld').forEach((el) => el.remove());
   });
 
   it('injects ItemList JSON-LD script when technologies are provided', () => {
@@ -63,7 +64,7 @@ describe('SeoSchema', () => {
     expect(script).toBeNull();
   });
 
-  it('includes position, name, and description for each item', () => {
+  it('includes position, name, and z-score description for each item', () => {
     render(<SeoSchema technologies={mockTechnologies} />);
 
     const script = document.querySelector('script[data-dynamic-jsonld="itemlist"]')!;
@@ -73,7 +74,15 @@ describe('SeoSchema', () => {
     expect(firstItem['@type']).toBe('ListItem');
     expect(firstItem.position).toBe(1);
     expect(firstItem.name).toBe('React');
+    // Description includes the composite z-score
     expect(firstItem.description).toContain('2.50');
+    // Description also includes per-source z-scores
+    expect(firstItem.description).toContain('npm');
+    expect(firstItem.description).toContain('2.00');
+    expect(firstItem.description).toContain('GitHub');
+    expect(firstItem.description).toContain('1.50');
+    expect(firstItem.description).toContain('HN');
+    expect(firstItem.description).toContain('0.80');
   });
 
   it('cleans up script tag on unmount', () => {
@@ -83,5 +92,22 @@ describe('SeoSchema', () => {
     unmount();
 
     expect(document.querySelector('script[data-dynamic-jsonld="itemlist"]')).toBeNull();
+  });
+
+  it('removes prerendered JSON-LD when updating with fresh data', () => {
+    // Simulate a prerendered JSON-LD from build time
+    const prerendered = document.createElement('script');
+    prerendered.type = 'application/ld+json';
+    prerendered.id = 'prerendered-jsonld';
+    prerendered.textContent = JSON.stringify({ '@type': 'ItemList', itemListElement: [] });
+    document.head.appendChild(prerendered);
+
+    expect(document.getElementById('prerendered-jsonld')).toBeTruthy();
+
+    render(<SeoSchema technologies={mockTechnologies} />);
+
+    // Prerendered script should be removed, replaced by dynamic
+    expect(document.getElementById('prerendered-jsonld')).toBeNull();
+    expect(document.querySelector('script[data-dynamic-jsonld="itemlist"]')).toBeTruthy();
   });
 });

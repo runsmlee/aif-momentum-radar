@@ -1,0 +1,311 @@
+[
+  {
+    "name": "React",
+    "npmWeekly": [
+      126493993,
+      134118055,
+      135354063,
+      128167860,
+      113402041,
+      142540426,
+      149932361,
+      132661178
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Vue",
+    "npmWeekly": [
+      11840624,
+      12475877,
+      13547674,
+      11735268,
+      10182237,
+      13656894,
+      13980783,
+      12760283
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Svelte",
+    "npmWeekly": [
+      3990068,
+      4800283,
+      5804659,
+      4220900,
+      4617271,
+      4759978,
+      4771757,
+      4864918
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Solid.js",
+    "npmWeekly": [
+      2312732,
+      2506202,
+      2589472,
+      2397589,
+      2069410,
+      2628048,
+      2956501,
+      2475855
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Qwik",
+    "npmWeekly": [
+      26651,
+      28742,
+      30972,
+      27195,
+      25658,
+      29660,
+      35415,
+      32968
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Astro",
+    "npmWeekly": [
+      2655593,
+      3000963,
+      3085375,
+      2990890,
+      2643219,
+      3233669,
+      3540663,
+      3142112
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Remix",
+    "npmWeekly": [
+      729467,
+      916201,
+      930520,
+      925685,
+      1012040,
+      791176,
+      785230,
+      835438
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Next.js",
+    "npmWeekly": [
+      32746770,
+      36394712,
+      38828546,
+      38571238,
+      32519000,
+      37943235,
+      43125527,
+      36065785
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Nuxt",
+    "npmWeekly": [
+      1373134,
+      1481470,
+      1576383,
+      1436591,
+      1265301,
+      1709064,
+      1768371,
+      1492295
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Tailwind CSS",
+    "npmWeekly": [
+      102105350,
+      109817355,
+      111353559,
+      106181555,
+      95255107,
+      117344640,
+      122408191,
+      106869692
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Zustand",
+    "npmWeekly": [
+      34670342,
+      36901781,
+      37569468,
+      36354284,
+      33165647,
+      41212048,
+      43387099,
+      38377047
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Jotai",
+    "npmWeekly": [
+      4144987,
+      3685845,
+      4634734,
+      4384355,
+      4232740,
+      5126104,
+      5354228,
+      4974357
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "tRPC",
+    "npmWeekly": [
+      3272112,
+      3513100,
+      3632581,
+      3530704,
+      3068635,
+      3851725,
+      3896498,
+      3524727
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Prisma",
+    "npmWeekly": [
+      11346057,
+      12672305,
+      12369200,
+      11736834,
+      10740705,
+      13104548,
+      13736100,
+      11833945
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Drizzle",
+    "npmWeekly": [
+      8683108,
+      9524885,
+      9889784,
+      9868411,
+      8835995,
+      11200358,
+      11735813,
+      10267977
+    ],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Bun",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Deno",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Vite",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Turborepo",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Vitest",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Playwright",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "TanStack Query",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Radix UI",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Framer Motion",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Three.js",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "GSAP",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Hono",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Effect",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  },
+  {
+    "name": "Biome",
+    "npmWeekly": [],
+    "githubWeekly": [],
+    "hnWeekly": []
+  }
+]

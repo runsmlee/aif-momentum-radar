@@ -1,9 +1,10 @@
 // ============================================================================
-// SeoSchema — Dynamically injects ItemList JSON-LD structured data
+// SeoSchema — Dynamically updates ItemList JSON-LD structured data
 // ============================================================================
-// When the leaderboard data is available, this component renders a script
-// tag with ItemList schema so search engines can display the ranked list
-// in rich results.
+// On initial page load, the build-time prerender plugin injects a static
+// ItemList JSON-LD into <head>. When the client fetches fresh data, this
+// component replaces it with updated z-scores so crawlers and users always
+// see the most accurate rankings.
 
 import { useEffect } from 'react';
 import type { TechnologyMomentum } from '../lib/anomaly';
@@ -14,7 +15,8 @@ interface SeoSchemaProps {
 
 /**
  * Builds the ItemList JSON-LD structured data from the ranked technologies.
- * Each item includes the technology name, position, and momentum score.
+ * Each item includes the technology name, position, and momentum z-score
+ * (including per-source breakdown in the description).
  */
 function buildItemListJsonLd(technologies: TechnologyMomentum[]): string {
   const sorted = [...technologies].sort((a, b) => b.compositeScore - a.compositeScore);
@@ -30,7 +32,7 @@ function buildItemListJsonLd(technologies: TechnologyMomentum[]): string {
       position: index + 1,
       name: tech.name,
       url: `https://mvp-v3-d8e9b072-8256-430a-9df6-91eb.vercel.app/#${encodeURIComponent(tech.name)}`,
-      description: `${tech.name} momentum score: ${tech.compositeScore.toFixed(2)}`,
+      description: `Momentum z-score: ${tech.compositeScore.toFixed(2)} (npm: ${(tech.zScores.npm ?? 0).toFixed(2)}, GitHub: ${(tech.zScores.github ?? 0).toFixed(2)}, HN: ${(tech.zScores.hn ?? 0).toFixed(2)})`,
     })),
   };
 
@@ -38,14 +40,28 @@ function buildItemListJsonLd(technologies: TechnologyMomentum[]): string {
 }
 
 /**
- * Injects a JSON-LD script tag into document.head when technologies data is available.
- * Cleans up the script tag on unmount or when data changes.
+ * Replaces the JSON-LD script tag (prerendered or dynamic) with fresh data.
+ * Cleans up previous script tags on unmount or when data changes.
  */
 export function SeoSchema({ technologies }: SeoSchemaProps): null {
   useEffect(() => {
     if (technologies.length === 0) return;
 
     const jsonLdString = buildItemListJsonLd(technologies);
+
+    // Remove any existing dynamic JSON-LD
+    const existingDynamic = document.querySelector('script[data-dynamic-jsonld="itemlist"]');
+    if (existingDynamic) {
+      existingDynamic.remove();
+    }
+
+    // Remove the static prerendered JSON-LD (replaced by fresh data)
+    const existingPrerendered = document.getElementById('prerendered-jsonld');
+    if (existingPrerendered) {
+      existingPrerendered.remove();
+    }
+
+    // Inject the updated JSON-LD
     const script = document.createElement('script');
     script.type = 'application/ld+json';
     script.setAttribute('data-dynamic-jsonld', 'itemlist');
@@ -53,7 +69,6 @@ export function SeoSchema({ technologies }: SeoSchemaProps): null {
     document.head.appendChild(script);
 
     return () => {
-      // Remove previous dynamic JSON-LD on re-render/unmount
       const existing = document.querySelector('script[data-dynamic-jsonld="itemlist"]');
       if (existing) {
         existing.remove();

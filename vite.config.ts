@@ -1,9 +1,10 @@
 /// <reference types="vitest/config" />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { prerenderPlugin } from './scripts/prerender';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), prerenderPlugin()],
   define: {
     'process.env.NODE_ENV': JSON.stringify('test'),
   },
