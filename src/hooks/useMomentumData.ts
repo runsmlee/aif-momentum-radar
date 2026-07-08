@@ -1,21 +1,26 @@
 // ============================================================================
-// useMomentumData — Hook for fetching, caching, and computing momentum data
+// useMomentumData — Hook for fetching and caching momentum data
+// ============================================================================
+// Fetches ranked leaderboard data from the /api/leaderboard serverless
+// function (ISR-cached on Vercel's CDN) instead of calling 90+ external
+// APIs directly from the browser.  This reduces network requests, improves
+// time-to-interactive, and ensures data freshness via server-side ISR.
+//
+// Hydration priority:
+//   1. Prerendered data (injected at build time) — instant render for SEO + UX
+//   2. localStorage cache — instant render on repeat visits
+//   3. Fresh /api/leaderboard fetch — ISR-cached on CDN, refreshed every ~3h
 // ============================================================================
 
 import { useState, useEffect, useCallback } from 'react';
 import {
-  fetchAllTechData,
   getCache,
   setCache,
   isCacheStale,
   CACHE_TTL,
-  type RawTechData,
 } from '../lib/dataSources';
-import {
-  computeTechnologyMomentum,
-  type TechnologyMomentum,
-} from '../lib/anomaly';
-import { getPrerenderedData } from '../lib/prerenderedData';
+import type { TechnologyMomentum } from '../lib/anomaly';
+import { getPrerenderedData, type PrerenderedData } from '../lib/prerenderedData';
 
 const CACHE_KEY = 'momentum-radar-v1';
 
@@ -27,21 +32,26 @@ interface MomentumDataState {
   isStale: boolean;
 }
 
+/** Shape of the API response from /api/leaderboard */
+interface ApiLeaderboardResponse {
+  technologies: TechnologyMomentum[];
+  timestamp: number;
+  stale?: boolean;
+}
+
 /**
- * Hook that manages fetching momentum data from APIs.
+ * Hook that manages fetching momentum data from the serverless API.
  *
- * Hydration priority:
- *   1. Prerendered data (injected at build time) — instant render for SEO + UX
- *   2. localStorage cache — instant render on repeat visits
- *   3. Fresh API fetch — fallback for first visit with no prerender
- *
- * Always fetches fresh data in the background for up-to-date rankings.
+ * Data flows through three tiers:
+ *   1. Prerendered build-time data (instant first paint)
+ *   2. localStorage cache (instant on repeat visits)
+ *   3. /api/leaderboard endpoint (ISR-cached, refreshed every ~3 hours)
  */
 export function useMomentumData(): MomentumDataState & {
   refresh: () => void;
 } {
   // Check for build-time prerendered data on first render
-  const prerendered = getPrerenderedData();
+  const prerendered: PrerenderedData | null = getPrerenderedData();
 
   const [state, setState] = useState<MomentumDataState>({
     technologies: prerendered?.technologies ?? [],
@@ -51,40 +61,30 @@ export function useMomentumData(): MomentumDataState & {
     isStale: prerendered !== null,
   });
 
-  const processData = useCallback((rawData: RawTechData[]): TechnologyMomentum[] => {
-    return rawData
-      .map((raw) => {
-        const weeklyData = {
-          npm: raw.npmWeekly,
-          github: raw.githubWeekly,
-          hn: raw.hnWeekly,
-        };
-        return computeTechnologyMomentum(raw.name, weeklyData);
-      })
-      .filter((t) => t.compositeScore !== 0 || t.zScores.npm !== null);
-  }, []);
-
   const fetchFresh = useCallback(async () => {
     setState((prev) => ({ ...prev, isLoading: true, error: null }));
     try {
-      const rawData = await fetchAllTechData();
-      const technologies = processData(rawData);
+      const res = await fetch('/api/leaderboard');
+      if (!res.ok) {
+        throw new Error(`API returned ${res.status}`);
+      }
+      const data = (await res.json()) as ApiLeaderboardResponse;
 
-      // Cache the raw data
-      setCache(CACHE_KEY, rawData);
+      // Cache the computed technologies (setCache adds its own timestamp)
+      setCache(CACHE_KEY, data.technologies);
 
       setState({
-        technologies,
+        technologies: data.technologies,
         isLoading: false,
-        lastUpdated: Date.now(),
+        lastUpdated: data.timestamp,
         error: null,
-        isStale: false,
+        isStale: data.stale ?? false,
       });
 
       // Track analytics
       if (typeof window !== 'undefined' && window.aif?.track) {
         window.aif.track('leaderboard_loaded', {
-          tech_count: technologies.length,
+          tech_count: data.technologies.length,
         });
       }
     } catch (err) {
@@ -94,7 +94,7 @@ export function useMomentumData(): MomentumDataState & {
         error: err instanceof Error ? err.message : 'Failed to load data',
       }));
     }
-  }, [processData]);
+  }, []);
 
   // Initial load: hydrate from prerender/cache, then fetch fresh
   useEffect(() => {
@@ -103,15 +103,13 @@ export function useMomentumData(): MomentumDataState & {
       window.aif.track('page_view', { path: window.location.pathname });
     }
 
-    // If we already have prerendered data, fetch fresh in the background
+    // If we already have prerendered data, check localStorage for newer cache
     if (prerendered) {
-      // Also check localStorage cache — prefer the most recent of the two
-      const cached = getCache<RawTechData[]>(CACHE_KEY);
+      const cached = getCache<TechnologyMomentum[]>(CACHE_KEY);
       if (cached && cached.timestamp > prerendered.timestamp) {
-        const technologies = processData(cached.data);
         const stale = isCacheStale(cached, CACHE_TTL);
         setState({
-          technologies,
+          technologies: cached.data,
           isLoading: false,
           lastUpdated: cached.timestamp,
           error: null,
@@ -119,18 +117,17 @@ export function useMomentumData(): MomentumDataState & {
         });
         if (!stale) return; // cache is fresh, no need to refetch
       }
-      // Fetch fresh data in background
+      // Fetch fresh data in background (ISR will return fast from CDN)
       fetchFresh();
       return;
     }
 
     // No prerendered data — try cache, then fetch
-    const cached = getCache<RawTechData[]>(CACHE_KEY);
+    const cached = getCache<TechnologyMomentum[]>(CACHE_KEY);
     if (cached) {
-      const technologies = processData(cached.data);
       const stale = isCacheStale(cached, CACHE_TTL);
       setState({
-        technologies,
+        technologies: cached.data,
         isLoading: false,
         lastUpdated: cached.timestamp,
         error: null,
@@ -144,7 +141,7 @@ export function useMomentumData(): MomentumDataState & {
       fetchFresh();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [fetchFresh, processData]);
+  }, [fetchFresh]);
 
   const refresh = useCallback(() => {
     // Track refresh click
