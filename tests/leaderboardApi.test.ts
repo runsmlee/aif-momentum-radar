@@ -111,9 +111,9 @@ describe('leaderboard API computation pipeline', () => {
 });
 
 describe('API ISR cache headers', () => {
-  it('ISR cache duration is 3 hours (10800 seconds)', () => {
-    const cacheControl = 'public, s-maxage=10800, stale-while-revalidate=86400';
-    expect(cacheControl).toContain('s-maxage=10800');
-    expect(cacheControl).toContain('stale-while-revalidate=86400');
+  it('ISR cache duration is 8 hours (28800 seconds) within 6-12h spec', () => {
+    const cacheControl = 'public, s-maxage=28800, stale-while-revalidate=172800';
+    expect(cacheControl).toContain('s-maxage=28800');
+    expect(cacheControl).toContain('stale-while-revalidate=172800');
   });
 });

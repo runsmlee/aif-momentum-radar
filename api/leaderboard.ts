@@ -75,12 +75,12 @@ export default async function handler(_req: Request): Promise<Response> {
       status: 200,
       headers: {
         'Content-Type': 'application/json; charset=utf-8',
-        // ISR: CDN serves cached response for 3 hours (s-maxage),
-        //      then revalidates in the background for up to 24 hours
-        //      (stale-while-revalidate). This means the leaderboard data
-        //      is refreshed every ~3 hours without a full rebuild.
+        // ISR: CDN serves cached response for 8 hours (s-maxage),
+        //      then revalidates in the background for up to 48 hours
+        //      (stale-while-revalidate). This matches the weekly data
+        //      cadence while keeping the leaderboard fresh (6-12h range).
         'Cache-Control':
-          'public, s-maxage=10800, stale-while-revalidate=86400',
+          'public, s-maxage=28800, stale-while-revalidate=172800',
         // Allow the Vite dev server and deployed domain to access this endpoint
         'Access-Control-Allow-Origin': '*',
       },

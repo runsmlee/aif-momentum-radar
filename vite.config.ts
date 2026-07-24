@@ -3,10 +3,11 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { prerenderPlugin } from './scripts/prerender';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), prerenderPlugin()],
   define: {
-    'process.env.NODE_ENV': JSON.stringify('test'),
+    // Use the actual Vite mode so production builds get NODE_ENV=production
+    'process.env.NODE_ENV': JSON.stringify(mode === 'test' ? 'test' : mode),
   },
   test: {
     globals: true,
@@ -14,4 +15,4 @@ export default defineConfig({
     setupFiles: './tests/setup.ts',
     css: true,
   },
-});
+}));
