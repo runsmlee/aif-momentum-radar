@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mvp-v3-d8e9b072-8256-430a-9df6-91eb.vercel.app/sitemap.xml

@@ -93,6 +93,20 @@ describe('leaderboard API computation pipeline', () => {
     expect(result.technologies.length).toBeGreaterThanOrEqual(15);
   });
 
+  it('snapshot has complete data for all tracked technologies (no empty entries)', () => {
+    // Every entry in the snapshot should have at least one non-empty data source
+    // so the prerendered HTML is never sparse
+    for (const tech of FALLBACK_SNAPSHOT) {
+      const hasData =
+        tech.npmWeekly.length > 0 ||
+        tech.githubWeekly.length > 0 ||
+        tech.hnWeekly.length > 0;
+      expect(hasData).toBe(true);
+    }
+    // Should have at least 25 technologies with real data
+    expect(FALLBACK_SNAPSHOT.length).toBeGreaterThanOrEqual(25);
+  });
+
   it('z-scores are correctly computed (not random)', () => {
     const result = buildLeaderboard(FALLBACK_SNAPSHOT);
 

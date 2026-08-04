@@ -51,7 +51,7 @@ function escapeHtml(str: string): string {
  * Generates semantic HTML for the leaderboard that crawlers can parse.
  * Uses a <table> with proper <th> headers and real text content.
  */
-function generateLeaderboardHtml(technologies: TechnologyMomentum[], maxRows = 20): string {
+function generateLeaderboardHtml(technologies: TechnologyMomentum[], maxRows = 30): string {
   const top = technologies.slice(0, maxRows);
 
   const rows = top
@@ -62,15 +62,22 @@ function generateLeaderboardHtml(technologies: TechnologyMomentum[], maxRows = 2
       const githubZ = tech.zScores.github !== null ? tech.zScores.github.toFixed(2) : 'n/a';
       const hnZ = tech.zScores.hn !== null ? tech.zScores.hn.toFixed(2) : 'n/a';
       const arrow = tech.compositeScore > 0 ? '&#9650;' : '&#9660;';
+      const trend = tech.compositeScore > 0 ? 'surging' : 'cooling';
 
-      return `<tr><td>${rank}</td><td>${escapeHtml(tech.name)}</td><td>${arrow} ${score}</td><td>npm ${npmZ}</td><td>GitHub ${githubZ}</td><td>HN ${hnZ}</td></tr>`;
+      return `<tr><td>${rank}</td><td>${escapeHtml(tech.name)}</td><td>${arrow} ${score}</td><td>${trend}</td><td>npm ${npmZ}</td><td>GitHub ${githubZ}</td><td>HN ${hnZ}</td></tr>`;
     })
     .join('\n');
 
-  return `<h1>Momentum Radar</h1>` +
-    `<p>Fastest growing open source projects this week, ranked by real growth signals from npm, GitHub, and Hacker News.</p>` +
-    `<table><thead><tr><th>#</th><th>Technology</th><th>Momentum Score</th><th>npm z-score</th><th>GitHub z-score</th><th>HN z-score</th></tr></thead>` +
-    `<tbody>\n${rows}\n</tbody></table>`;
+  const techList = top.map((t) => escapeHtml(t.name)).join(', ');
+  const topFive = top.slice(0, 5).map((t) => escapeHtml(t.name)).join(', ');
+
+  return `<h1>Momentum Radar — Fastest Growing Open Source Projects This Week</h1>` +
+    `<p>Discover which developer tools and open source projects are surging right now. Real-time growth rankings computed from npm, GitHub, and Hacker News data using z-score anomaly detection.</p>` +
+    `<p>Top movers this week: ${topFive}. Full rankings below.</p>` +
+    `<table aria-label="Momentum leaderboard ranked by composite z-score"><thead><tr><th scope="col">Rank</th><th scope="col">Technology</th><th scope="col">Momentum Score</th><th scope="col">Trend</th><th scope="col">npm z-score</th><th scope="col">GitHub z-score</th><th scope="col">HN z-score</th></tr></thead>` +
+    `<tbody>\n${rows}\n</tbody></table>` +
+    `<p>Tracked technologies: ${techList}.</p>` +
+    `<p>Methodology: Composite momentum = weighted z-score (npm 0.5 / GitHub 0.3 / HN 0.2). Z-scores compare current week against 8-week baseline. Data fetched live from npm, GitHub, and Hacker News APIs.</p>`;
 }
 
 // ---------------------------------------------------------------------------
